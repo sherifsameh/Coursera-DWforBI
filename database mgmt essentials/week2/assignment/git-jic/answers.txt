@@ -1,0 +1,155 @@
+#Coursera - Data Wharehousing for BI Specialization 
+#Database Management Fundamentals 
+#Week2 – Assignment Answers
+#To authenticate with a password file, enter the following commands, and then enter the SYS password when prompted:
+
+#$ sqlplus /nolog
+#SQL> CONNECT SYS AS SYSDBA
+#To authenticate with operating system authentication, enter the following commands:
+
+#$ sqlplus /nolog
+#SQL> CONNECT / AS SYSDBA
+
+CREATE SPFILE FROM PFILE;
+
+#if using DB_CREATE_FILE_DEST='/u01/app/oracle/oradata' in init.ora
+
+CREATE DATABASE mynewdb
+USER SYS IDENTIFIED BY sys_password
+USER SYSTEM IDENTIFIED BY system_password
+EXTENT MANAGEMENT LOCAL
+DEFAULT TEMPORARY TABLESPACE temp
+UNDO TABLESPACE undotbs1
+DEFAULT TABLESPACE users;
+
+#other wise use...
+
+CREATE DATABASE mynewdb
+   USER SYS IDENTIFIED BY sys_password
+   USER SYSTEM IDENTIFIED BY system_password
+   LOGFILE GROUP 1 ('/u01/logs/my/redo01a.log','/u02/logs/my/redo01b.log') SIZE 100M BLOCKSIZE 512,
+           GROUP 2 ('/u01/logs/my/redo02a.log','/u02/logs/my/redo02b.log') SIZE 100M BLOCKSIZE 512,
+           GROUP 3 ('/u01/logs/my/redo03a.log','/u02/logs/my/redo03b.log') SIZE 100M BLOCKSIZE 512
+   MAXLOGHISTORY 1
+   MAXLOGFILES 16
+   MAXLOGMEMBERS 3
+   MAXDATAFILES 1024
+   CHARACTER SET AL32UTF8
+   NATIONAL CHARACTER SET AL16UTF16
+   EXTENT MANAGEMENT LOCAL
+   DATAFILE '/u01/app/oracle/oradata/mynewdb/system01.dbf'
+     SIZE 700M REUSE AUTOEXTEND ON NEXT 10240K MAXSIZE UNLIMITED
+   SYSAUX DATAFILE '/u01/app/oracle/oradata/mynewdb/sysaux01.dbf'
+     SIZE 550M REUSE AUTOEXTEND ON NEXT 10240K MAXSIZE UNLIMITED
+   DEFAULT TABLESPACE users
+      DATAFILE '/u01/app/oracle/oradata/mynewdb/users01.dbf'
+      SIZE 500M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED
+   DEFAULT TEMPORARY TABLESPACE tempts1
+      TEMPFILE '/u01/app/oracle/oradata/mynewdb/temp01.dbf'
+      SIZE 20M REUSE AUTOEXTEND ON NEXT 640K MAXSIZE UNLIMITED
+   UNDO TABLESPACE undotbs1
+      DATAFILE '/u01/app/oracle/oradata/mynewdb/undotbs01.dbf'
+      SIZE 200M REUSE AUTOEXTEND ON NEXT 5120K MAXSIZE UNLIMITED
+   USER_DATA TABLESPACE usertbs
+      DATAFILE '/u01/app/oracle/oradata/mynewdb/usertbs01.dbf'
+      SIZE 200M REUSE AUTOEXTEND ON MAXSIZE UNLIMITED;
+
+
+DROP TABLE Customer;
+DROP TABLE Facility;
+DROP TABLE Location;
+DROP TABLE Employee;
+DROP TABLE ResourceTbl;
+DROP TABLE EventRequest;
+DROP TABLE EventPlan;
+DROP TABLE EventPlanLine;
+
+CREATE TABLE Customer (
+custno          VARCHAR2(8)	CONSTRAINT Customer_custNoNN NOT NULL,
+custname        VARCHAR2(30)	CONSTRAINT Customer_custNameNN NOT NULL,
+address         VARCHAR2(30)	CONSTRAINT Customer_custAddrNN NOT NULL,
+Internal        CHAR(1)		CONSTRAINT Customer_custIntNN NOT NULL CONSTRAINT Customer_IntCHK CHECK (Internal IN ('0','1')),
+contact         VARCHAR2(60)	CONSTRAINT Customer_custContNN NOT NULL,
+phone           CHAR(10)	CONSTRAINT Customer_custPhoneNN NOT NULL,
+city            VARCHAR2(30)	CONSTRAINT Customer_custCityNN NOT NULL,
+state           CHAR(2)		CONSTRAINT Customer_custStateNN NOT NULL,
+zip             INTEGER		CONSTRAINT Customer_custZipNN NOT NULL,
+CONSTRAINT Customer_custNoPK PRIMARY KEY (custno)
+);
+
+CREATE TABLE Facility (
+facno           VARCHAR2(8)	CONSTRAINT Facility_facNoNN NOT NULL,
+facname         VARCHAR2(30)	CONSTRAINT Facility_facNameNN NOT NULL, 
+CONSTRAINT Facility_facNoPK PRIMARY KEY (facno),
+CONSTRAINT Facility_facNameUN UNIQUE (facname)
+);
+
+CREATE TABLE Location (
+locno           VARCHAR2(8)	CONSTRAINT Location_locNoNN NOT NULL,
+facno           VARCHAR2(8)	CONSTRAINT Location_facNoNN NOT NULL,
+locname         VARCHAR2(30)	CONSTRAINT Location_locNameNN NOT NULL,
+CONSTRAINT Location_locNoPK PRIMARY KEY (locno),
+CONSTRAINT Location_facNoFK FOREIGN KEY (facno) REFERENCES Facility (facno)
+);
+
+CREATE TABLE Employee (
+empno		VARCHAR2(8)	CONSTRAINT Employee_empNoNN NOT NULL,
+empname		VARCHAR2(30)	CONSTRAINT Employee_empNameNN NOT NULL,
+department	VARCHAR2(30)	CONSTRAINT Employee_deptNN NOT NULL,
+email		VARCHAR2(30)	CONSTRAINT Employee_emailNN NOT NULL,
+phone		VARCHAR2(11)	CONSTRAINT Employee_phoneNN NOT NULL,
+CONSTRAINT Employee_empNoPK PRIMARY KEY (empno)
+);
+
+CREATE TABLE ResourceTbl (
+resno		VARCHAR2(8)	CONSTRAINT ResourceTbl_resNoNN NOT NULL,
+resname		VARCHAR2(30)	CONSTRAINT ResourceTbl_resNameNN NOT NULL,
+rate		DECIMAL(18,2)  	CONSTRAINT ResourceTbl_rateNN NOT NULL CONSTRAINT ResourceTbl_rateCHK CHECK (rate > 0),
+CONSTRAINT ResourceTbl_resNoPK PRIMARY KEY (resno)
+);
+
+CREATE TABLE EventRequest (
+eventno		VARCHAR2(8)	CONSTRAINT EventRequest_eventNoNN NOT NULL,
+dateheld	DATE		CONSTRAINT EventRequest_dateHeldNN NOT NULL,
+datereq		DATE		CONSTRAINT EventRequest_dateReqNN NOT NULL,
+facno		VARCHAR2(8)	CONSTRAINT EventRequest_facNoNN NOT NULL,
+custno		VARCHAR2(8)	CONSTRAINT EventRequest_custNoNN NOT NULL,
+dateauth	DATE,
+status		VARCHAR2(8)	CONSTRAINT EventRequest_statusNN NOT NULL CONSTRAINT EventRequest_statusCHK CHECK (status IN ('Pending', 'Denied', 'Approved')),
+estcost		DECIMAL(18,2)	CONSTRAINT EventRequest_estCostNN NOT NULL,
+estaudience	INTEGER		CONSTRAINT EventRequest_estAudienceNN NOT NULL CONSTRAINT EventRequest_estAudCHK CHECK (estaudience > 0),
+budno		VARCHAR2(8),
+CONSTRAINT EventRequest_eventNoPK PRIMARY KEY (eventno),
+CONSTRAINT EventRequest_custNoFK FOREIGN KEY (custno) REFERENCES Customer (custno),
+CONSTRAINT EventRequest_facNoFK FOREIGN KEY (facno) REFERENCES Facility (facno)
+);
+
+CREATE TABLE EventPlan (
+planno		VARCHAR2(8)	CONSTRAINT EventPlan_planNoNN NOT NULL,
+eventno		VARCHAR2(8)	CONSTRAINT EventPlan_eventNoNN NOT NULL,
+workdate	DATE		CONSTRAINT EventPlan_workDateNN NOT NULL,
+notes		VARCHAR2(100),
+activity	VARCHAR2(10)	CONSTRAINT EventPlan_activityNN NOT NULL,
+empno		VARCHAR2(8),
+CONSTRAINT EventPlan_planNoPK PRIMARY KEY (planno),
+CONSTRAINT EventPlan_eventNoFK FOREIGN KEY (eventno) REFERENCES EventRequest (eventno),
+CONSTRAINT EventPlan_empNoFK FOREIGN KEY (empno) REFERENCES Employee (empno)
+);
+
+CREATE TABLE EventPlanLine (
+planno		VARCHAR2(8)	CONSTRAINT EventPlanLine_planNoNN NOT NULL,
+lineno		INTEGER		CONSTRAINT EventPlanLine_lineNoNN NOT NULL,
+timestart	DATE		CONSTRAINT EventPlanLine_timeStartNN NOT NULL,
+timeend		DATE		CONSTRAINT EventPlanLine_timeEndNN NOT NULL,
+numberfld	INTEGER		CONSTRAINT EventPlanLine_numberFldNN NOT NULL,
+locno		VARCHAR2(8)	CONSTRAINT EventPlanLine_locNoNN NOT NULL,
+resno		VARCHAR2(8)	CONSTRAINT EventPlanLine_resNoNN NOT NULL,
+CONSTRAINT EventPlanLine_lineNoPK PRIMARY KEY (lineno,planno),
+CONSTRAINT EventPlanLine_TimeStartEndCHK CHECK (timestart < timeend),
+CONSTRAINT EventPlanLine_planNoFK FOREIGN KEY (planno) REFERENCES EventPlan (planno),
+CONSTRAINT EventPlanLine_locNoFK FOREIGN KEY (locno) REFERENCES Location (locno),
+CONSTRAINT EventPlanLine_resNoFK FOREIGN KEY (resno) REFERENCES ResourceTbl (resno)
+);
+
+
+
