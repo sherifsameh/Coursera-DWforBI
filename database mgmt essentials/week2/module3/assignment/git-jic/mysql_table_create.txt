@@ -1,0 +1,103 @@
+#Coursera - Data Wharehousing for BI Specialization 
+#Database Management Fundamentals 
+#Week2 – Assignment Answers
+#To authenticate with a password file, enter the following commands, and then enter the SYS password when prompted:
+
+drop table eventplanline;
+drop table ResourceTbl;
+drop table Location;
+drop table eventplan;
+drop table employee;
+drop table eventrequest;
+drop table customer;
+drop table facility;
+
+CREATE TABLE Customer (
+custno          VARCHAR(8)	NOT NULL,
+custname        VARCHAR(30)	NOT NULL,
+address         VARCHAR(30)	NOT NULL,
+Internal        CHAR(1)		NOT NULL CHECK (Internal IN ('0','1')),
+contact         VARCHAR(60)	NOT NULL,
+phone           CHAR(10)	NOT NULL,
+city            VARCHAR(30)	NOT NULL,
+state           CHAR(2)		NOT NULL,
+zip             INTEGER		NOT NULL,
+CONSTRAINT Customer_custNoPK PRIMARY KEY (custno)
+);
+
+CREATE TABLE Facility (
+facno           VARCHAR(8)	NOT NULL,
+facname         VARCHAR(30)	NOT NULL, 
+CONSTRAINT Facility_facNoPK PRIMARY KEY (facno),
+CONSTRAINT Facility_facNameUN UNIQUE (facname)
+);
+
+CREATE TABLE Location (
+locno           VARCHAR(8)	NOT NULL,
+facno           VARCHAR(8)	NOT NULL,
+locname         VARCHAR(30)	NOT NULL,
+CONSTRAINT Location_locNoPK PRIMARY KEY (locno),
+CONSTRAINT Location_facNoFK FOREIGN KEY (facno) REFERENCES Facility (facno)
+);
+
+CREATE TABLE Employee (
+empno		VARCHAR(8)	NOT NULL,
+empname		VARCHAR(30)	NOT NULL,
+department	VARCHAR(30)	NOT NULL,
+email		VARCHAR(30)	NOT NULL,
+phone		VARCHAR(11)	NOT NULL,
+CONSTRAINT Employee_empNoPK PRIMARY KEY (empno)
+);
+
+CREATE TABLE ResourceTbl (
+resno		VARCHAR(8)	NOT NULL,
+resname		VARCHAR(30)	NOT NULL,
+rate		DECIMAL(18,2)  	NOT NULL CHECK (rate > 0),
+CONSTRAINT ResourceTbl_resNoPK PRIMARY KEY (resno)
+);
+
+CREATE TABLE EventRequest (
+eventno		VARCHAR(8)	NOT NULL,
+dateheld	DATE		NOT NULL,
+datereq		DATE		NOT NULL,
+facno		VARCHAR(8)	NOT NULL,
+custno		VARCHAR(8)	NOT NULL,
+dateauth	DATE,
+status		VARCHAR(8)	NOT NULL CHECK (status IN ('Pending', 'Denied', 'Approved')),
+estcost		DECIMAL(18,2)	NOT NULL,
+estaudience	INTEGER		NOT NULL CHECK (estaudience > 0),
+budno		VARCHAR(8),
+CONSTRAINT EventRequest_eventNoPK PRIMARY KEY (eventno),
+CONSTRAINT EventRequest_custNoFK FOREIGN KEY (custno) REFERENCES Customer (custno),
+CONSTRAINT EventRequest_facNoFK FOREIGN KEY (facno) REFERENCES Facility (facno)
+);
+
+CREATE TABLE EventPlan (
+planno		VARCHAR(8)	NOT NULL,
+eventno		VARCHAR(8)	NOT NULL,
+workdate	DATE		NOT NULL,
+notes		VARCHAR(100),
+activity	VARCHAR(10)	NOT NULL,
+empno		VARCHAR(8),
+CONSTRAINT EventPlan_planNoPK PRIMARY KEY (planno),
+CONSTRAINT EventPlan_eventNoFK FOREIGN KEY (eventno) REFERENCES EventRequest (eventno),
+CONSTRAINT EventPlan_empNoFK FOREIGN KEY (empno) REFERENCES Employee (empno)
+);
+
+CREATE TABLE EventPlanLine (
+planno		VARCHAR(8)	NOT NULL,
+lineno		INTEGER		NOT NULL,
+timestart	DATETIME	NOT NULL,
+timeend		DATETIME	NOT NULL,
+numberfld	INTEGER		NOT NULL,
+locno		VARCHAR(8)	NOT NULL,
+resno		VARCHAR(8)	NOT NULL,
+CONSTRAINT EventPlanLine_lineNoPK PRIMARY KEY (lineno,planno),
+CONSTRAINT EventPlanLine_TimeStartEndCHK CHECK (timestart < timeend),
+CONSTRAINT EventPlanLine_planNoFK FOREIGN KEY (planno) REFERENCES EventPlan (planno),
+CONSTRAINT EventPlanLine_locNoFK FOREIGN KEY (locno) REFERENCES Location (locno),
+CONSTRAINT EventPlanLine_resNoFK FOREIGN KEY (resno) REFERENCES ResourceTbl (resno)
+);
+
+
+
