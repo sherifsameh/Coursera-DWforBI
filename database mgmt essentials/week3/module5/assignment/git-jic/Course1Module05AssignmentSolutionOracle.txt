@@ -1,0 +1,113 @@
+Course1 Module05 Assignment Answers - Oracle
+
+
+Query Formulation Answers
+
+
+1.
+	
+SELECT eventrequest.eventno, dateheld, COUNT(*) "Number of Plans"
+FROM eventrequest, eventplan
+WHERE eventplan.workdate BETWEEN to_date('12/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventrequest.eventno = eventplan.eventno
+GROUP BY eventrequest.eventno, dateheld
+HAVING COUNT(*) > 1;
+
+SELECT eventrequest.eventno, dateheld, COUNT(*) "Number of Plans"
+FROM eventrequest INNER JOIN eventplan ON eventrequest.eventno = eventplan.eventno
+WHERE eventplan.workdate BETWEEN to_date('12/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+GROUP BY eventrequest.eventno, dateheld
+HAVING COUNT(*) > 1;
+
+2.
+
+SELECT eventplan.planno, eventrequest.eventno, workdate, activity
+FROM eventrequest, eventplan, facility
+WHERE eventplan.workdate BETWEEN to_date('12/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventrequest.eventno = eventplan.eventno 
+      AND eventrequest.facno = facility.facno
+      AND facname = 'Basketball arena';
+
+SELECT eventplan.planno, eventrequest.eventno, workdate, activity
+FROM ( eventrequest INNER JOIN eventplan 
+                  ON eventrequest.eventno = eventplan.eventno ) 
+               INNER JOIN Facility ON eventrequest.facno = facility.facno
+WHERE eventplan.workdate BETWEEN to_date('12/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND facname = 'Basketball arena';
+
+SELECT eventplan.planno, eventrequest.eventno, workdate, activity
+FROM eventrequest, eventplan
+WHERE eventplan.workdate BETWEEN to_date('12/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventrequest.eventno = eventplan.eventno 
+      AND facno IN
+          ( SELECT facno FROM facility WHERE facname = 'Basketball arena' );
+
+3.	
+	
+SELECT eventrequest.eventno, dateheld, status, estcost
+FROM eventrequest, employee, facility, eventplan
+WHERE dateheld BETWEEN to_date('10/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventplan.empno = employee.empno AND eventrequest.facno = facility.facno
+      AND facname = 'Basketball arena' AND empname = 'Mary Manager'
+      AND eventrequest.eventno = eventplan.eventno;
+
+SELECT eventrequest.eventno, dateheld, status, estcost
+FROM ( ( eventrequest INNER JOIN eventplan 
+                  ON eventrequest.eventno = eventplan.eventno ) 
+               INNER JOIN Facility ON eventrequest.facno = facility.facno )
+               INNER JOIN employee ON eventplan.empno = employee.empno
+WHERE dateheld BETWEEN to_date('10/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND facname = 'Basketball arena' AND empname = 'Mary Manager';
+
+SELECT eventrequest.eventno, dateheld, status, estcost
+FROM eventrequest, eventplan
+WHERE dateheld BETWEEN to_date('10/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventrequest.eventno = eventplan.eventno 
+      AND facno IN
+          ( SELECT facno FROM facility WHERE facname = 'Basketball arena' )
+      AND empno IN
+          ( SELECT empno FROM employee WHERE empname = 'Mary Manager' );
+
+4.	The first solution is preferred because it involves one less table. However, I will also give credit for the second answer as it involves different join operations.
+
+SELECT eventplan.planno, lineno, locname, resname, numberfld, 
+                timestart, timeend
+FROM facility, eventplan, eventplanline, resourcetbl, location
+WHERE eventplan.workdate BETWEEN to_date('10/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventplan.planno = eventplanline.planno AND location.facno = facility.facno
+      AND facname = 'Basketball arena' AND eventplanline.resno = resourcetbl.resno
+      AND location.locno = eventplanline.locno 
+      AND eventplan.activity = 'Operation';
+
+SELECT eventplan.planno, lineno, locname, resname, numberfld, timestart, timeend
+FROM eventrequest, facility, eventplan, eventplanline, resourcetbl, location
+WHERE eventplan.workdate BETWEEN to_date('10/1/2013','mm/dd/yyyy') AND to_date('12/31/2013','mm/dd/yyyy')
+      AND eventplan.planno = eventplanline.planno AND eventrequest.facno = facility.facno
+      AND facname = 'Basketball arena' AND eventplanline.resno = resourcetbl.resno
+      AND eventrequest.eventno = eventplan.eventno 
+      AND location.locno = eventplanline.locno 
+      AND eventplan.activity = 'Operation';
+
+
+Database Modification Answers
+
+1.	
+INSERT INTO Facility ( FacNo, FacName )
+VALUES ('F107', 'Swimming Pool');
+
+2.	
+INSERT INTO Location ( LocNo, FacNo, LocName )
+VALUES ('L107', 'F107', 'Door');
+
+3.	
+INSERT INTO Location ( LocNo, FacNo, LocName )
+VALUES ('L108', 'F107', 'Locker Room');
+
+4.	
+UPDATE Location SET LocName = ‘Gate’
+WHERE LocNo = 'L107'; 
+
+5.
+DELETE Location
+WHERE LocNo = 'L108';
+

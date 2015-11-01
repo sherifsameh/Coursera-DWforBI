@@ -1,0 +1,53 @@
+mysql> select table_name, column_name, is_nullable, column_type, column_key from information_schema.columns where table_schema = 'iacdb' order by column_name;
++---------------+-------------+-------------+---------------+------------+
+| table_name    | column_name | is_nullable | column_type   | column_key |
++---------------+-------------+-------------+---------------+------------+
+| EventPlan     | activity    | NO          | varchar(10)   |            |
+| Customer      | address     | NO          | varchar(30)   |            |
+| EventRequest  | budno       | YES         | varchar(8)    |            |
+| Customer      | city        | NO          | varchar(30)   |            |
+| Customer      | contact     | NO          | varchar(60)   |            |
+| Customer      | custname    | NO          | varchar(30)   |            |
+| Customer      | custno      | NO          | varchar(8)    | PRI        |
+| EventRequest  | custno      | NO          | varchar(8)    | MUL        |
+| EventRequest  | dateauth    | YES         | date          |            |
+| EventRequest  | dateheld    | NO          | date          |            |
+| EventRequest  | datereq     | NO          | date          |            |
+| Employee      | department  | NO          | varchar(30)   |            |
+| Employee      | email       | NO          | varchar(30)   |            |
+| Employee      | empname     | NO          | varchar(30)   |            |
+| Employee      | empno       | NO          | varchar(8)    | PRI        |
+| EventPlan     | empno       | YES         | varchar(8)    | MUL        |
+| EventRequest  | estaudience | NO          | int(11)       |            |
+| EventRequest  | estcost     | NO          | decimal(18,2) |            |
+| EventPlan     | eventno     | NO          | varchar(8)    | MUL        |
+| EventRequest  | eventno     | NO          | varchar(8)    | PRI        |
+| Facility      | facname     | NO          | varchar(30)   | UNI        |
+| EventRequest  | facno       | NO          | varchar(8)    | MUL        |
+| Facility      | facno       | NO          | varchar(8)    | PRI        |
+| Location      | facno       | NO          | varchar(8)    | MUL        |
+| Customer      | Internal    | NO          | char(1)       |            |
+| EventPlanLine | lineno      | NO          | int(11)       | PRI        |
+| Location      | locname     | NO          | varchar(30)   |            |
+| EventPlanLine | locno       | NO          | varchar(8)    | MUL        |
+| Location      | locno       | NO          | varchar(8)    | PRI        |
+| EventPlan     | notes       | YES         | varchar(100)  |            |
+| EventPlanLine | numberfld   | NO          | int(11)       |            |
+| Customer      | phone       | NO          | char(10)      |            |
+| Employee      | phone       | NO          | varchar(11)   |            |
+| EventPlan     | planno      | NO          | varchar(8)    | PRI        |
+| EventPlanLine | planno      | NO          | varchar(8)    | PRI        |
+| ResourceTbl   | rate        | NO          | decimal(18,2) |            |
+| ResourceTbl   | resname     | NO          | varchar(30)   |            |
+| EventPlanLine | resno       | NO          | varchar(8)    | MUL        |
+| ResourceTbl   | resno       | NO          | varchar(8)    | PRI        |
+| Customer      | state       | NO          | char(2)       |            |
+| EventRequest  | status      | NO          | varchar(8)    |            |
+| EventPlanLine | timeend     | NO          | datetime      |            |
+| EventPlanLine | timestart   | NO          | datetime      |            |
+| EventPlan     | workdate    | NO          | date          |            |
+| Customer      | zip         | NO          | int(11)       |            |
++---------------+-------------+-------------+---------------+------------+
+45 rows in set (0.02 sec)
+
+
